@@ -1,19 +1,14 @@
 import os
 import ctypes
+from colorama import init as _init
 from colorama import Fore as _Fore
+from colorama import Style as _Style
 
 from . import bot
+from . import ascii
 
 
 class Menu:
-    TITLE = """\
-▄▄▄▄▄▪  ▄ •▄ ▄▄▄▄▄      ▄ •▄     ▄▄▄▄·       ▄▄▄▄▄
-•██  ██ █▌▄▌▪•██  ▪     █▌▄▌▪    ▐█ ▀█▪▪     •██  
- ▐█.▪▐█·▐▀▀▄· ▐█.▪ ▄█▀▄ ▐▀▀▄·    ▐█▀▀█▄ ▄█▀▄  ▐█.▪
- ▐█▌·▐█▌▐█.█▌ ▐█▌·▐█▌.▐▌▐█.█▌    ██▄▪▐█▐█▌.▐▌ ▐█▌·
- ▀▀▀ ▀▀▀·▀  ▀ ▀▀▀  ▀█▄▀▪·▀  ▀    ·▀▀▀▀  ▀█▄▀▪ ▀▀▀ 
-\n\n"""
-
     WINDOW_TITLE = """Tiktok Bot | Github: @dylannalex"""
 
     def __init__(self, operating_system: str):
@@ -21,9 +16,12 @@ class Menu:
         self.operating_system = operating_system
         if operating_system == "Windows":
             self.clear_command = "cls"
+            self._set_window_title()
         else:
             self.clear_command = "clear"
 
+        # Other
+        _init(autoreset=True)
         self._load_bot()
 
     def _load_bot(self):
@@ -50,42 +48,36 @@ class Menu:
 
         option = self._input("Enter an option: ", new_lines=1)
         self._validate_option(option)
-        task_id = int(option)
+        task = bot.find_task(int(option), self.zefoy_bot.tasks)
         url = self._input("Enter TikTok Video link: ")
         total_executions = int(self._input("Enter total executions: "))
-        self.zefoy_bot.set_task_request(task_id=task_id, tiktok_video_url=url)
+        self.zefoy_bot.set_task_request(selected_task=task, tiktok_video_url=url)
 
+        task_log = bot.TaskLog(
+            task.name, url, 0, total_executions, self._print_text, self._print_title
+        )
         for execution in range(total_executions):
-            log_function = lambda *msg: self._task_log(execution, url, *msg)
-            self.zefoy_bot.complete_task(log_function)
-
-    def _task_log(self, execution: int, tiktok_video: str, *messages: str):
-        self._print_title()
-        task_name = self.zefoy_bot.task_request.task.name.capitalize()
-        self._print_text(f"Task selected: {task_name}")
-        self._print_text(f"TikTok video: {tiktok_video}")
-        self._print_text(f"Times sent: {execution}")
-
-        for message in messages:
-            self._print_text(message)
+            task_log.current_execution = execution
+            self.zefoy_bot.complete_task(task_log)
 
     def _print_title(self):
         os.system(self.clear_command)
-        print(f"{_Fore.BLUE}{__class__.TITLE}")
+        print(f"{_Style.BRIGHT}{_Fore.BLUE}{ascii.TITLE}\n\n")
 
     def _print_text(
         self, text: str, bullet: str = "-", end: str = "\n", new_lines: int = 0
     ):
         start = "\n" * new_lines
         print(
-            f"{start} {_Fore.WHITE}[{_Fore.BLUE}{bullet}{_Fore.WHITE}] {text}", end=end
+            f"{start} {_Fore.WHITE}[{_Fore.BLUE}{bullet}{_Fore.WHITE}] {text}",
+            end=end,
         )
 
     def _input(self, text: str, new_lines: int = 0):
         self._print_text(text, end="", new_lines=new_lines)
-        return input()
+        return input(_Fore.WHITE)
 
-    def set_window_title(self, message: str = None):
+    def _set_window_title(self, message: str = None):
         if self.operating_system != "Windows":
             return
         title = __class__.WINDOW_TITLE
