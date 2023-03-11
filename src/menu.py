@@ -68,8 +68,9 @@ class Menu:
         self, text: str, bullet: str = "-", end: str = "\n", new_lines: int = 0
     ):
         start = "\n" * new_lines
+        bullet_ = f"{_Style.BRIGHT}{_Fore.BLUE}{bullet}"
         print(
-            f"{start} {_Fore.WHITE}[{_Fore.BLUE}{bullet}{_Fore.WHITE}] {text}",
+            f"{start} {_Fore.WHITE}[{bullet_}{_Fore.WHITE}] {text}",
             end=end,
         )
 
