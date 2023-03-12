@@ -29,6 +29,8 @@
 * Favorites
 * Comment Likes
 
+**IMPORTANT:** this bot _will not_ ask for your account information. The only thing it is going to ask for is the link of your TikTok video which you want to increase views, likes, shares, etc.
+
 ## How to install
 
 #### Install Python
